@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pygithub = "*"
+langchain = "*"
+langchain-community = "*"
+openai = "*"
+tiktoken = "*"
+pinecone-client = "*"
+langchain-pinecone = "*"
+sentence-transformers = "*"
+flask = "*"
+python-dotenv = "*"
+pinecone = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
