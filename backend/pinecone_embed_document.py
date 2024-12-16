@@ -1,51 +1,47 @@
 import os
-from pinecone import Pinecone
-from langchain_pinecone import PineconeVectorStore
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.schema import Document
+import asyncio
+import json
 from dotenv import load_dotenv
+import openai
+from pinecone import Pinecone
 
+from langchain.schema import Document
+from api.get_data_routes import file_content
 
 load_dotenv()
 
-def main():
+async def embed_document():
+    try:
+        documents = []
 
-    pinecone_api_key = os.getenv("PINECONE_API_KEY")
-    if not pinecone_api_key:
-        raise ValueError("PINECONE_API_KEY environment variable is not set.")
+        # Convert Documents to text
+        for file in file_content:
+            doc = Document(
+                page_content=f"{file['name']}\n{file['content']}",
+                metadata={"source": file['content']}
+            )
+            res = openai.embeddings.create(
+                        input=doc.page_content,
+                        model="text-embedding-3-small"
+                    )
+            embedding = res.data[0].embedding
+            documents.append({
+                "id": file['name'],
+                "values": embedding,
+                "metadata": doc.metadata
+            })
 
+        
+       
+        pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
+        index = pc.Index("codebase-rag")
 
-    pc = Pinecone(api_key=pinecone_api_key)
+        # Upsert vectors into Pinecone
+        if documents:
+            index.upsert(vectors=documents, namespace="https://github.com/CoderAgent/SecureAgent")
 
-
-    pinecone_index = pc.Index("codebase-rag")
-
-
-    vectorstore = PineconeVectorStore(index_name="codebase-rag", embedding=HuggingFaceEmbeddings())
-
-    file_content = [
-        {"name": "example_file.py", "content": "print('Hello, World!')"},
-    
-    ]
-
-    documents = []
-
-    for file in file_content:
-        doc = Document(
-            page_content=f"{file['name']}\n{file['content']}",
-            metadata={"source": file['name']}
-        )
-        documents.append(doc)
-
-   
-    vectorstore = PineconeVectorStore.from_documents(
-        documents=documents,
-        embedding=HuggingFaceEmbeddings(),
-        index_name="codebase-rag",
-        namespace="https://github.com/CoderAgent/SecureAgent"
-    )
-
-    print("Documents embedded and uploaded to Pinecone successfully.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(embed_document())

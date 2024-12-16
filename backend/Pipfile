@@ -9,12 +9,13 @@ langchain = "*"
 langchain-community = "*"
 openai = "*"
 tiktoken = "*"
-pinecone-client = "*"
-langchain-pinecone = "*"
 sentence-transformers = "*"
 flask = "*"
 python-dotenv = "*"
 pinecone = "*"
+pinecone-plugin-inference = "==2.0.0"
+pinecone-client = "==3.0.0"
+flask-cors = "*"
 
 [dev-packages]
 

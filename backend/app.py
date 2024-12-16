@@ -7,14 +7,13 @@ import os
 
 app = Flask(__name__)
 
-# OPTIMIZATION: scale for production
-web_url=os.environ.get("WEB_URL")
-CORS(app, origins=[web_url,"http://localhost:3000"])
+
+CORS(app, origins=["http://localhost:3000"])
 
 app.register_blueprint(get_data_routes,url_prefix='/api/data')
 
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5000)
     
