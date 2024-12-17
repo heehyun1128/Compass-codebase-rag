@@ -16,6 +16,8 @@ pinecone = "*"
 pinecone-plugin-inference = "==2.0.0"
 pinecone-client = "==3.0.0"
 flask-cors = "*"
+langchain-pinecone = "*"
+langchain-huggingface = "*"
 
 [dev-packages]
 

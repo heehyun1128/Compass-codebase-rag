@@ -9,8 +9,6 @@ type Message = {
   content: string;
 };
 
-
-
 const Search: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -58,6 +56,7 @@ const Search: React.FC = () => {
           userPrompt: searchTerm,
         }
       );
+      console.log(res.data);
       // update message history
       setMessages((messages: Message[]) => {
         const updatedMessages = [
@@ -76,7 +75,6 @@ const Search: React.FC = () => {
     }
   };
 
-  
   return (
     <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 text-center relative z-10 ">
       {!searchTerm && noInputErr && (
@@ -126,66 +124,28 @@ const Search: React.FC = () => {
         </div>
       )}
 
-      {/* search bar and chat history */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className=" flex justify-center"
-      >
-        <div className="relative w-full max-w-2xl">
-          <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            type="text"
-            required
-            placeholder="Search for something..."
-            className="w-full py-3 px-4 pr-12 rounded-full border border-[#3f48e9] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-          <button
-            onClick={searching}
-            className="bg-[#3f48e9] p-2 absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </button>
-        </div>
-      </motion.div>
-      {messages.length? (
-        <div
-         
-          className=" flex justify-center"
-        >
+      {messages.length ? (
+        <div className=" flex justify-center">
           <div className="w-[80vw] flex justify-end">
-            <motion.button
+            {/* <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{  duration: 0.6 }}
-              className="bg-black text-white py-2 px-4 rounded-md ml-4"
+              transition={{ duration: 0.6 }}
+              className="bg-[#56875a] text-white py-2 px-4 rounded-md ml-4"
               onClick={() => {
                 localStorage.clear();
                 setMessages([]);
               }}
             >
-              Clear Chat History
-            </motion.button>
+              Start New Chat
+            </motion.button> */}
           </div>
         </div>
-      ):<></>}
-      {/* OPTIMIZATION: make chat section scrollable */}
-      <div className="overflow-y-auto bg-gray-50 bg-opacity-50 h-[30vh] mt-4 shadow p-6 rounded-xl ">
+      ) : (
+        <></>
+      )}
+
+      <div className="overflow-y-auto border border-[#56875a] border-opacity-20 h-[75vh] mt-4 shadow p-8 rounded-xl ">
         <AnimatePresence>
           {messages?.map((chat, index) => (
             <motion.div
@@ -198,24 +158,29 @@ const Search: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div
-                className={`p-3 rounded-2xl ${
-                  chat?.role === "user"
-                    ? "bg-[#3f48e9] text-white"
-                    : "bg-white shadow-gray"
-                } shadow-md max-w-[90%] break-words`}
-              >
-                <strong>
-                  {chat?.role === "user" ? "You: " : "Code-agent: "}
-                </strong>{" "}
+              <motion.div >
                 {chat?.role === "user" ? (
-                  chat?.content
+                  <div
+                    className={`flex justify-start items-center p-3 rounded-2xl  shadow-md max-w-[90%]  min-w-[50px] ${
+                      chat?.role === "user"
+                        ? "bg-[#56875a] text-white"
+                        : "bg-white shadow-gray"
+                    }`}
+                  >
+                    {chat?.content}
+                  </div>
                 ) : (
-                  <div className="flex justify-start">
+                  <>
+                  <div className=" flex justify-start items-start max-w-[90%]">
+                    <div>
+                      <i className="fa-solid fa-compass text-[#56875a] mr-2 fa-2xl"></i>
+                    </div>
                     <ReactMarkdown className="prose prose-sm max-w-none overflow-hidden ">
                       {chat?.content}
                     </ReactMarkdown>
                   </div>
+                    <div className="border-b border-[#56875a] border-opacity-50 border-dotted w-full mt-6 mb-6">
+                    </div></>
                 )}
               </motion.div>
             </motion.div>
@@ -231,6 +196,29 @@ const Search: React.FC = () => {
           </motion.div>
         )}
       </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        className=" flex justify-center mt-4 "
+      >
+        <div className="relative w-[80vw] ">
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            type="text"
+            required
+            placeholder="Search for something..."
+            className="w-full h-[60px] py-3 px-4 pr-12 rounded-md border bg-[#609a65] bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+          <button
+            onClick={searching}
+            className="bg-[#56875a] text-white p-2 absolute right-1 top-1/2 transform -translate-y-1/2 rounded-md"
+          >
+            send
+          </button>
+        </div>
+      </motion.div>
     </main>
   );
 };
