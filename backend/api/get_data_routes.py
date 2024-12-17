@@ -4,6 +4,7 @@ from openai import OpenAI
 from pinecone import Pinecone
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
+from backend.pinecone_embed_document import embed_document
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 load_dotenv()
@@ -18,11 +19,11 @@ def get_huggingface_embeddings(text, model_name="sentence-transformers/all-mpnet
     model = SentenceTransformer(model_name)
     return model.encode(text)
 
-def perform_rag(user_prompt):
+def perform_rag(user_prompt,repo_url):
     raw_query_embedding = get_huggingface_embeddings(user_prompt)
     print("raw_query_embedding.tolist()",raw_query_embedding.tolist())
     index = pc.Index(os.environ.get("PINECONE_INDEX"))
-    top_matches = index.query(vector=raw_query_embedding.tolist(), top_k=5, include_metadata=True, namespace="https://github.com/CoderAgent/SecureAgent")
+    top_matches = index.query(vector=raw_query_embedding.tolist(), top_k=5, include_metadata=True, namespace=repo_url)
    
     contexts = [item['metadata']['content'] for item in top_matches['matches']]
     augmented_query = "<CONTEXT>\n" + "\n\n-------\n\n".join(contexts[:10]) + "\n-------\n</CONTEXT>\n\n\n\nMY QUESTION:\n" + user_prompt
@@ -41,17 +42,19 @@ def perform_rag(user_prompt):
 
 @get_data_routes.route('/ai-response', methods=['POST'])
 def perform_rag_route():
+   
     data = request.json
     if not data:
             return jsonify({"error": "No data provided"}), 400
         
     user_prompt=data.get('userPrompt',"")
+    repo_url=data.get('repo_url',"")
     print("user_prompt",user_prompt)
     if not user_prompt:
         return jsonify({"error": "User prompt is required"}), 400
 
 
-    response = perform_rag(user_prompt)
+    response = perform_rag(user_prompt,repo_url)
     return response
 
 

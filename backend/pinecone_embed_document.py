@@ -8,7 +8,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from backend.clone_repo import path
+
 
 SUPPORTED_EXTENSIONS = {'.py', '.js', '.tsx', '.jsx', '.ipynb', '.java',
                         '.cpp', '.ts', '.go', '.rs', '.vue', '.swift', '.c', '.h'}
@@ -51,7 +51,7 @@ def get_main_files_content(repo_path: str):
     return files_content
 
 
-async def embed_document():
+def embed_document(repo_path,repo_url):
     processed_data = []
     try:
         documents = []
@@ -64,7 +64,7 @@ async def embed_document():
         
         index = pc.Index("codebase-rag")
 
-        for file in get_main_files_content(path):
+        for file in get_main_files_content(repo_path):
             doc = Document(
                 page_content=f"{file['name']}\n{file['content']}",
                 metadata={"source": file['name']}
@@ -79,14 +79,15 @@ async def embed_document():
                 "values": embedding,
                 "metadata": {"source": file["name"], "content": doc.page_content}
             })
+            print("processed_data",processed_data)
 
         # Upsert data to Pinecone
         if processed_data:
-            index.upsert(vectors=processed_data, namespace=os.environ.get("PINECONE_NAMESPACE"))
+            index.upsert(vectors=processed_data, namespace=repo_url)
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
 
-if __name__ == "__main__":
-    asyncio.run(embed_document())
+# if __name__ == "__main__":
+#     asyncio.run(embed_document())
