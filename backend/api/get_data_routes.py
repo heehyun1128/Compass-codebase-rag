@@ -29,8 +29,7 @@ def perform_rag(user_prompt):
    
     contexts = [item['metadata']['content'] for item in top_matches['matches']]
     augmented_query = "<CONTEXT>\n" + "\n\n-------\n\n".join(contexts[:10]) + "\n-------\n</CONTEXT>\n\n\n\nMY QUESTION:\n" + user_prompt
-    system_prompt = f"""You are a Senior Software Engineer, specializing in TypeScript.
-    Answer any questions I have about the codebase, based on the code provided. Always consider all of the context provided when forming a response."""
+    system_prompt = os.environ.get("SYSTEM_PROMPT")
     
     
     llm_response = client.chat.completions.create(
