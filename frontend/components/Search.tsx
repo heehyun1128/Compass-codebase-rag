@@ -58,6 +58,7 @@ const Search: React.FC = () => {
           userPrompt: searchTerm,
         }
       );
+      console.log(res.data)
       // update message history
       setMessages((messages: Message[]) => {
         const updatedMessages = [
@@ -184,7 +185,7 @@ const Search: React.FC = () => {
           </div>
         </div>
       ):<></>}
-      {/* OPTIMIZATION: make chat section scrollable */}
+    
       <div className="overflow-y-auto bg-gray-50 bg-opacity-50 h-[30vh] mt-4 shadow p-6 rounded-xl ">
         <AnimatePresence>
           {messages?.map((chat, index) => (
