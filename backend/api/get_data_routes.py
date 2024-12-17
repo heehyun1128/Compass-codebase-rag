@@ -14,9 +14,6 @@ client = OpenAI(base_url="https://api.groq.com/openai/v1",
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 
 
-
-
-
 def get_huggingface_embeddings(text, model_name="sentence-transformers/all-mpnet-base-v2"):
     model = SentenceTransformer(model_name)
     return model.encode(text)
@@ -24,7 +21,7 @@ def get_huggingface_embeddings(text, model_name="sentence-transformers/all-mpnet
 def perform_rag(user_prompt):
     raw_query_embedding = get_huggingface_embeddings(user_prompt)
     print("raw_query_embedding.tolist()",raw_query_embedding.tolist())
-    index = pc.Index("codebase-rag")
+    index = pc.Index(os.environ.get("PINECONE_INDEX"))
     top_matches = index.query(vector=raw_query_embedding.tolist(), top_k=5, include_metadata=True, namespace="https://github.com/CoderAgent/SecureAgent")
    
     contexts = [item['metadata']['content'] for item in top_matches['matches']]
@@ -39,10 +36,9 @@ def perform_rag(user_prompt):
             {"role": "user", "content": augmented_query}
         ]
     )
-    print("llm_response.choices[0].message.content",llm_response.choices[0].message.content)
     return llm_response.choices[0].message.content
 
-# Define a single route to perform RAG
+
 @get_data_routes.route('/ai-response', methods=['POST'])
 def perform_rag_route():
     data = request.json

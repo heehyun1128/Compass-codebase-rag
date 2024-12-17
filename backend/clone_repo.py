@@ -10,5 +10,5 @@ def clone_repository(repo_url):
            Repo.clone_from(repo_url, repo_path)
        return repo_path
 
-path = clone_repository("https://github.com/CoderAgent/SecureAgent")
+path = clone_repository(os.environ.get("CLONE_REPO"))
 print(f"Repository cloned to: {path}")

@@ -40,7 +40,6 @@ def get_main_files_content(repo_path: str):
             if any(ignored_dir in root for ignored_dir in IGNORED_DIRS):
                 continue
 
-            # Process each file in current directory
             for file in files:
                 file_path = os.path.join(root, file)
                 if os.path.splitext(file)[1] in SUPPORTED_EXTENSIONS:
@@ -72,7 +71,7 @@ async def embed_document():
             )
 
             documents.append(doc)
-            print("documents",documents)
+            
             embedding = embedding_model.embed_documents([doc.page_content])[0]
 
             processed_data.append({
@@ -83,7 +82,7 @@ async def embed_document():
 
         # Upsert data to Pinecone
         if processed_data:
-            index.upsert(vectors=processed_data, namespace="https://github.com/CoderAgent/SecureAgent")
+            index.upsert(vectors=processed_data, namespace=os.environ.get("PINECONE_NAMESPACE"))
 
     except Exception as e:
         print(f"An error occurred: {e}")
