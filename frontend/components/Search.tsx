@@ -14,7 +14,7 @@ const Search: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [noInputErr, setNoInputErr] = useState<boolean>(false);
-
+  const [codebaseURL, setCodebaseURL] = useState<string>("");
   useEffect(() => {
     const storedChats = localStorage.getItem("chatHistory");
 
@@ -54,6 +54,8 @@ const Search: React.FC = () => {
         `http://127.0.0.1:5000/api/data/ai-response`,
         {
           userPrompt: searchTerm,
+          repo_url: codebaseURL,
+          
         }
       );
       console.log(res.data);
@@ -72,6 +74,17 @@ const Search: React.FC = () => {
       console.log("JSON.stringify(messages)", JSON.stringify(messages));
 
       setLoading(false);
+    }
+  };
+
+  const handleCloneRepo = async (): Promise<void> => {
+    try {
+      const res = await axios.post(`http://127.0.0.1:5000/api/data/clone-repo`, {
+        codebaseURL: codebaseURL,
+      });
+      console.log(res.data);
+    } catch (error) {
+      console.error("Error cloning repository:", error);
     }
   };
 
@@ -123,7 +136,25 @@ const Search: React.FC = () => {
           </button>
         </div>
       )}
-
+      <div className="flex flex-col justify-center items-start">
+        <p className="text-sm font-bold text-gray-500 mb-2">
+          Add a codebase URL here (github repo)
+        </p>
+        <div className="flex  justify-center items-start">
+          <input
+            type="text"
+            onChange={(e) => setCodebaseURL(e.target.value)}
+            placeholder="Enter codebase URL"
+            className="border border-[#56875a] border-opacity-20 rounded-md p-2 w-[70vw]"
+          />
+          <button
+            onClick={handleCloneRepo}
+            className="bg-[#56875a] text-white py-2 px-4 rounded-md ml-4"
+          >
+            Add Codebase
+          </button>
+        </div>
+      </div>
       {messages.length ? (
         <div className=" flex justify-center">
           <div className="w-[80vw] flex justify-end">
@@ -145,7 +176,7 @@ const Search: React.FC = () => {
         <></>
       )}
 
-      <div className="overflow-y-auto border border-[#56875a] border-opacity-20 h-[75vh] mt-4 shadow p-8 rounded-xl ">
+      <div className="overflow-y-auto border border-[#56875a] border-opacity-20 h-[68vh] mt-4 shadow p-8 rounded-xl flex flex-col ">
         <AnimatePresence>
           {messages?.map((chat, index) => (
             <motion.div
@@ -158,29 +189,25 @@ const Search: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div >
+              <motion.div>
                 {chat?.role === "user" ? (
                   <div
-                    className={`flex justify-start items-center p-3 rounded-2xl  shadow-md max-w-[90%]  min-w-[50px] ${
-                      chat?.role === "user"
-                        ? "bg-[#56875a] text-white"
-                        : "bg-white shadow-gray"
-                    }`}
+                    className={`items-center p-3 rounded-2xl shadow-md ml-36 min-w-[50px] bg-[#56875a] text-white`} // Simplified class assignment
                   >
                     {chat?.content}
                   </div>
                 ) : (
                   <>
-                  <div className=" flex justify-start items-start max-w-[90%]">
-                    <div>
-                      <i className="fa-solid fa-compass text-[#56875a] mr-2 fa-2xl"></i>
+                    <div className=" flex justify-start items-start max-w-[80%]">
+                      <div>
+                        <i className="fa-solid fa-compass text-[#56875a] mr-2 fa-2xl"></i>
+                      </div>
+                      <ReactMarkdown className="prose prose-sm max-w-none overflow-hidden text-left ml-2">
+                        {chat?.content}
+                      </ReactMarkdown>
                     </div>
-                    <ReactMarkdown className="prose prose-sm max-w-none overflow-hidden ">
-                      {chat?.content}
-                    </ReactMarkdown>
-                  </div>
-                    <div className="border-b border-[#56875a] border-opacity-50 border-dotted w-full mt-6 mb-6">
-                    </div></>
+                    <div className="border-b border-[#56875a] border-opacity-50 border-dotted w-full mt-6 mb-6"></div>
+                  </>
                 )}
               </motion.div>
             </motion.div>
